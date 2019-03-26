@@ -1,0 +1,74 @@
+﻿@using PagedList;
+@using PagedList.Mvc;
+@model IEnumerable<TaskOdd.Models.Game>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+@if (User.IsInRole("Admin"))
+{
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+}
+<!--if (User.Identity.IsAuthenticated) //нямам представа дала трябва да могат да достъпват търсачката - не пише, значи ще си я ползват-->
+@using (Html.BeginForm())
+{
+    <p>
+        Find by name: @Html.TextBox("SearchString")
+        <input type="submit" value="Search" />
+    </p>
+}
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParm }, new { sortColumn = "name" })
+        </th>
+        <th>
+            @Html.ActionLink("Genre", "Index", new { sortOrder = ViewBag.GenreSortParm }, new { sortColumn = "genre" })
+        </th>
+        <th>
+            @Html.ActionLink("Rating", "Index", new { sortOrder = ViewBag.RatingSortParm }, new { sortColumn = "rating" })
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DOB)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Genre.GenreName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rating.RatingValue)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DOB)
+            </td>
+            @if (User.Identity.IsAuthenticated) //if(User.IsInRole("User"))
+            {
+                <td>
+                    @Html.ActionLink("Details", "Details", new { id = item.GameId })
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <span> | </span> @Html.ActionLink("Edit", "Edit", new { id = item.GameId }) <span> | </span>
+                        @Html.ActionLink("Delete", "Delete", new { id = item.GameId })
+                    }
+                </td>
+            }
+        </tr>
+    }
+
+</table>
+
+@Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page, searchString = ViewBag.NameSearch, sortOrder = ViewBag.CurrentSortParm }))
